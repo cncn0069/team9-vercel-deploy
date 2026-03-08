@@ -13,6 +13,8 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  // 단위 테스트(Jest)와 E2E테스트(Playwright)를 동시에 운영하기 위한 설정
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/tests/'],
 };
 
 export default createJestConfig(config);
