@@ -18,9 +18,11 @@
         "name": "next"
       }
     ],
+
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["jest", "node"]
   },
   "include": [
     "next-env.d.ts",
