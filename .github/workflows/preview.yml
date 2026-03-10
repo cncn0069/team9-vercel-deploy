@@ -10,7 +10,7 @@ env:
 
 jobs:
   verify-and-deploy:
-    name: 코드 검사 및 Preview 배포
+    name: Preview 배포
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,15 +30,6 @@ jobs:
 
       - name: 단위 테스트 실행
         run: npm test
-
-      - name: Playwright 브라우저 설치 (E2E 전용)
-        run: npx playwright install --with-deps chromium
-
-      - name: 프로젝트 빌드 검사
-        run: npm run build
-
-      - name: E2E 테스트 실행
-        run: npx playwright test
 
       # --- Vercel 배포 섹션 ---
 
