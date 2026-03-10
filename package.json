@@ -7,11 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:watchAll": "jest --watchAll",
+    "test:changed": "jest --onlyChanged",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
@@ -44,7 +49,6 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -57,6 +61,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-storybook": "^10.2.16",
     "globals": "^17.4.0",
     "husky": "^9.1.7",
@@ -64,6 +69,8 @@
     "jest-environment-jsdom": "^30.2.0",
     "lint-staged": "^16.3.2",
     "playwright": "^1.58.2",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "storybook": "^10.2.16",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
@@ -72,6 +79,13 @@
     "vitest": "^4.0.18"
   },
   "lint-staged": {
-    "**/*.{ts,tsx}": "eslint --fix"
+    "**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix",
+      "jest --findRelatedTests --passWithNoTests"
+    ],
+    "**/*.{js,jsx,json,md,css}": [
+      "prettier --write"
+    ]
   }
 }
