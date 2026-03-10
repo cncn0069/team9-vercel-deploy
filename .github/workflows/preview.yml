@@ -1,39 +1,74 @@
-name: Preview 배포 (개발 환경)
+name: Preview 배포 및 검증 (PR 전용)
+
+on:
+  pull_request:
+    branches: [main, develop]
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-on:
-  push:
-    branches: [develop]
-
 jobs:
-  deploy-preview:
-    name: 빌드 및 Preview 배포 (개발)
+  verify-and-deploy:
+    name: 코드 검사 및 Preview 배포
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
+      - name: 저장소 불러오기
+        uses: actions/checkout@v4
+
+      - name: Node.js 설치
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 의존성 설치
         run: npm ci
 
-      - name: Build check
+      - name: 단위 테스트 실행
+        run: npm test
+
+      - name: Playwright 브라우저 설치 (E2E 전용)
+        run: npx playwright install --with-deps chromium
+
+      - name: 프로젝트 빌드 검사
         run: npm run build
+
+      - name: E2E 테스트 실행
+        run: npx playwright test
+
+      # --- Vercel 배포 섹션 ---
 
       - name: Vercel CLI 설치
         run: npm install --global vercel@latest
 
-      - name: Vercel 환경 정보 가져오기 (Preview)
+      - name: Vercel 환경 정보 가져오기
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: 프로젝트 빌드 (Preview)
+      - name: 프로젝트 빌드 (Vercel Build)
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Vercel에 프로젝트 배포 (Preview)
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Vercel에 프로젝트 배포 및 URL 추출
+        id: deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+
+      - name: PR에 Preview 링크 댓글 달기
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = process.env.DEPLOY_URL;
+            const body = `🚀 **Preview 배포가 완료되었습니다!**\n\n| 서비스 | 링크 |\n| :--- | :--- |\n| **Vercel Preview** | [${url}](${url}) |\n\n---\n*최근 업데이트: ${new Date().toLocaleString('ko-KR')}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
