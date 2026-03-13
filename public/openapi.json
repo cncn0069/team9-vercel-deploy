@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "같이 달램 API",
     "version": "1.0.0",
@@ -97,6 +97,12 @@
           { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
           { "name": "type", "in": "query", "schema": { "type": "string" } },
           { "name": "region", "in": "query", "schema": { "type": "string" } },
+          { "name": "date", "in": "query", "schema": { "type": "string" } },
+          { "name": "id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "createdBy", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["dateTime", "participantCount", "registrationEnd"], "default": "dateTime" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "asc" } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
           { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } }
         ],
         "responses": { "200": { "description": "모임 목록 (data, nextCursor, hasMore)" } }
@@ -166,8 +172,16 @@
       "get": {
         "tags": ["Posts"],
         "summary": "게시글 목록",
-        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "200": { "description": "게시글 목록" } }
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["all", "best"], "default": "all" } },
+          { "name": "keyword", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt", "viewCount", "likeCount"], "default": "createdAt" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": { "200": { "description": "게시글 목록 (data, nextCursor, hasMore, 각 항목에 _count.comments 포함)" } }
       },
       "post": {
         "tags": ["Posts"],
@@ -249,8 +263,17 @@
         "tags": ["Users"],
         "summary": "내 모임 목록 (호스트+참여)",
         "security": [{ "Bearer": [] }],
-        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "200": { "description": "모임 목록" } }
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["joined", "created"] } },
+          { "name": "completed", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "reviewed", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "default": "dateTime" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "모임 목록 (data, nextCursor, hasMore)" } }
       }
     },
     "/{teamId}/users/me/reviews": {
@@ -297,7 +320,11 @@
         "summary": "모임 리뷰 목록",
         "parameters": [
           { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
-          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "userId", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt", "score"], "default": "createdAt" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } }
         ],
         "responses": { "200": { "description": "리뷰 목록" } }
       },
@@ -364,7 +391,7 @@
     "/{teamId}/meeting-types/{typeId}": {
       "get": {
         "tags": ["MeetingTypes"],
-        "summary": "모임 종류 상세",
+        "summary": "모임 종류 상세 (단일 조회)",
         "security": [{ "Bearer": [] }],
         "parameters": [
           { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
@@ -400,9 +427,16 @@
         "parameters": [
           { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
           { "name": "meetingId", "in": "query", "schema": { "type": "integer" } },
-          { "name": "userId", "in": "query", "schema": { "type": "string" } }
+          { "name": "userId", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "region", "in": "query", "schema": { "type": "string" } },
+          { "name": "date", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt", "score"], "default": "createdAt" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
         ],
-        "responses": { "200": { "description": "리뷰 목록" } }
+        "responses": { "200": { "description": "리뷰 목록 (data, nextCursor, hasMore)" } }
       }
     },
     "/{teamId}/reviews/statistics": {
@@ -457,7 +491,15 @@
         "tags": ["Favorites"],
         "summary": "찜한 모임 목록",
         "security": [{ "Bearer": [] }],
-        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "region", "in": "query", "schema": { "type": "string" } },
+          { "name": "date", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt", "dateTime", "registrationEnd", "participantCount"], "default": "createdAt" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
         "responses": { "200": { "description": "찜 목록" } }
       }
     },
