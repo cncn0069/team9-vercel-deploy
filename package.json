@@ -16,7 +16,8 @@
     "test:watch": "jest --watch",
     "test:watchAll": "jest --watchAll",
     "test:changed": "jest --onlyChanged",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:api": "npx tsx scripts/api-test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
