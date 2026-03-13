@@ -13,32 +13,42 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
   const sortBy = searchParams.get('sortBy') || 'dateTime';
   const sortOrder = searchParams.get('sortOrder') || 'asc';
   const cursor = searchParams.get('cursor');
-  const size = parseInt(searchParams.get('size') || '10');
+  const size = Math.min(100, parseInt(searchParams.get('size') || '10') || 10);
+
+  const sortCol =
+    sortBy === 'participantCount'
+      ? 'participant_count'
+      : sortBy === 'registrationEnd'
+        ? 'registration_end'
+        : 'date_time';
 
   let query = supabase
     .from('meetings')
-    .select('*, host:profiles!host_id(id, name, image)', { count: 'exact' })
+    .select('*, host:profiles!host_id(id, name, image)')
     .eq('team_id', params.teamId)
     .is('canceled_at', null);
 
   if (id) query = query.eq('id', id);
   if (type) query = query.eq('type', type);
   if (region) query = query.eq('region', region);
-  if (date) query = query.gte('date_time', date).lt('date_time', `${date}T23:59:59.999Z`);
+  if (date) query = query.gte('date_time', date).lte('date_time', `${date}T23:59:59.999Z`);
   if (createdBy) query = query.eq('created_by', createdBy);
 
-  query = query.order(sortBy === 'dateTime' ? 'date_time' : sortBy, {
-    ascending: sortOrder === 'asc',
-  });
-  const { data, error } = await query.range(0, size - 1);
+  query = query.order(sortCol, { ascending: sortOrder === 'asc' });
+  if (cursor) query = sortOrder === 'asc' ? query.gt('id', cursor) : query.lt('id', cursor);
+  const { data, error } = await query.limit(size + 1);
 
   if (error)
     return NextResponse.json({ code: 'INTERNAL', message: error.message }, { status: 500 });
 
+  const items = (data || []).slice(0, size);
+  const hasMore = (data?.length ?? 0) > size;
+  const nextCursor = hasMore && items.length ? String(items[items.length - 1]?.id) : null;
+
   return NextResponse.json({
-    data: data || [],
-    nextCursor: (data?.length ?? 0) >= size ? String((data?.at(-1) as any)?.id ?? '') : null,
-    hasMore: (data?.length ?? 0) >= size,
+    data: items,
+    nextCursor,
+    hasMore,
   });
 }
 
