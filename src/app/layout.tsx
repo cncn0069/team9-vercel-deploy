@@ -32,7 +32,7 @@ export default function RootLayout({
               Home
             </a>
             <a
-              href="/api-docs"
+              href="/docs/swagger"
               className="font-medium text-zinc-900 hover:text-zinc-700 dark:text-zinc-100 dark:hover:text-zinc-300"
             >
               API 문서 (Swagger)

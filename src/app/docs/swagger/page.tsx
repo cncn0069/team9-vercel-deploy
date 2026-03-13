@@ -7,10 +7,10 @@ const SwaggerUI = dynamic(() => import('swagger-ui-react').then((mod) => mod.def
   ssr: false,
 });
 
-export default function ApiDocsPage() {
+export default function SwaggerPage() {
   return (
     <div className="min-h-screen">
-      <SwaggerUI url="/openapi.json" />
+      <SwaggerUI url="/api/openapi" />
     </div>
   );
 }

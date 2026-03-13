@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: '같이 달램 API 문서 - OpenAPI Swagger UI',
 };
 
-export default function ApiDocsLayout({
+export default function SwaggerLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
