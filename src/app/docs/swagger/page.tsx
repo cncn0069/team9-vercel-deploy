@@ -7,10 +7,13 @@ const SwaggerUI = dynamic(() => import('swagger-ui-react').then((mod) => mod.def
   ssr: false,
 });
 
+// spec 직접 전달 → Vercel fetch/MIME 이슈 회피
+import openapiSpec from '../../../../public/openapi.json';
+
 export default function SwaggerPage() {
   return (
     <div className="min-h-screen">
-      <SwaggerUI url="/openapi.json" />
+      <SwaggerUI spec={openapiSpec} />
     </div>
   );
 }
