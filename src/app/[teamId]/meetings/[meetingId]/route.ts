@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 
 export async function GET(
@@ -20,7 +21,7 @@ export async function GET(
       { status: 404 }
     );
 
-  return NextResponse.json(data);
+  return NextResponse.json(keysToCamel(data));
 }
 
 export async function PATCH(
@@ -89,7 +90,7 @@ export async function PATCH(
 
   if (error)
     return NextResponse.json({ code: 'BAD_REQUEST', message: error.message }, { status: 400 });
-  return NextResponse.json(data);
+  return NextResponse.json(keysToCamel(data));
 }
 
 export async function DELETE(

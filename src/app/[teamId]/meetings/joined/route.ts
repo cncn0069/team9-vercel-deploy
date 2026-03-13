@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request, props: { params: Promise<{ teamId: string }> }) {
@@ -63,20 +64,18 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
 
   if (reviewed === 'true') {
     const filtered = items.filter((i) => i.isReviewed);
-    return NextResponse.json({
-      data: filtered,
-      nextCursor: null,
-      hasMore: false,
-    });
+    return NextResponse.json(keysToCamel({ data: filtered, nextCursor: null, hasMore: false }));
   }
   if (reviewed === 'false') {
     const filtered = items.filter((i) => !i.isReviewed);
-    return NextResponse.json({ data: filtered, nextCursor: null, hasMore: false });
+    return NextResponse.json(keysToCamel({ data: filtered, nextCursor: null, hasMore: false }));
   }
 
-  return NextResponse.json({
-    data: items,
-    nextCursor: items.length >= size ? String(items.at(-1)?.id ?? '') : null,
-    hasMore: items.length >= size,
-  });
+  return NextResponse.json(
+    keysToCamel({
+      data: items,
+      nextCursor: items.length >= size ? String(items.at(-1)?.id ?? '') : null,
+      hasMore: items.length >= size,
+    })
+  );
 }

@@ -20,7 +20,7 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
 
   let query = supabase
     .from('reviews')
-    .select('*, meeting:meetings(id, name, dateTime)')
+    .select('*, meeting:meetings(id, name, date_time)')
     .eq('team_id', params.teamId)
     .eq('user_id', user.id)
     .order(sortBy, { ascending: sortOrder === 'asc' })
@@ -55,7 +55,7 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
       score: r.score,
       comment: r.comment,
       meetingId: r.meeting_id,
-      meeting: r.meeting,
+      meeting: r.meeting ? { id: r.meeting.id, name: r.meeting.name, dateTime: r.meeting.date_time } : null,
       createdAt: r.created_at,
     })),
     nextCursor,

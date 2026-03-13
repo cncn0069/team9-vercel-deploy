@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request, props: { params: Promise<{ teamId: string }> }) {
@@ -34,7 +35,7 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
   const items = (data || []).slice(0, size);
   const hasMore = (data?.length ?? 0) > size;
   const nextCursor = hasMore && items.length ? String(items[items.length - 1]?.id) : null;
-  return NextResponse.json({ data: items, nextCursor, hasMore });
+  return NextResponse.json(keysToCamel({ data: items, nextCursor, hasMore }));
 }
 
 export async function DELETE(req: Request, props: { params: Promise<{ teamId: string }> }) {

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 
 export async function GET(
@@ -30,7 +31,7 @@ export async function GET(
       );
     return NextResponse.json({ code: 'INTERNAL', message: error.message }, { status: 500 });
   }
-  return NextResponse.json(data);
+  return NextResponse.json(keysToCamel(data));
 }
 
 export async function PATCH(
@@ -78,7 +79,7 @@ export async function PATCH(
       );
     return NextResponse.json({ code: 'INTERNAL', message: error.message }, { status: 500 });
   }
-  return NextResponse.json(data);
+  return NextResponse.json(keysToCamel(data));
 }
 
 export async function DELETE(

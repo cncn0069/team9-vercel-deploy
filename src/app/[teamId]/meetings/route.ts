@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request, props: { params: Promise<{ teamId: string }> }) {
@@ -45,11 +46,13 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
   const hasMore = (data?.length ?? 0) > size;
   const nextCursor = hasMore && items.length ? String(items[items.length - 1]?.id) : null;
 
-  return NextResponse.json({
-    data: items,
-    nextCursor,
-    hasMore,
-  });
+  return NextResponse.json(
+    keysToCamel({
+      data: items,
+      nextCursor,
+      hasMore,
+    })
+  );
 }
 
 export async function POST(req: Request, props: { params: Promise<{ teamId: string }> }) {
@@ -93,5 +96,5 @@ export async function POST(req: Request, props: { params: Promise<{ teamId: stri
     .from('participants')
     .insert({ team_id: params.teamId, meeting_id: data.id, user_id: decoded.id });
 
-  return NextResponse.json(data, { status: 201 });
+  return NextResponse.json(keysToCamel(data), { status: 201 });
 }

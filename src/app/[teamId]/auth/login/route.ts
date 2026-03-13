@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { signAccessToken, signRefreshToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
@@ -26,5 +27,9 @@ export async function POST(req: Request, props: { params: Promise<{ teamId: stri
   const refreshToken = signRefreshToken(payload);
 
   const { password: _, ...userProfile } = user;
-  return NextResponse.json({ user: userProfile, accessToken, refreshToken });
+  return NextResponse.json({
+    user: keysToCamel(userProfile),
+    accessToken,
+    refreshToken,
+  });
 }

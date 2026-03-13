@@ -22,13 +22,19 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
   const cursor = searchParams.get('cursor');
 
   if (type === 'created') {
+    const sortCol =
+      sortBy === 'participantCount'
+        ? 'participant_count'
+        : sortBy === 'registrationEnd'
+          ? 'registration_end'
+          : 'date_time';
     const { data, error } = await supabase
       .from('meetings')
       .select('*, host:profiles!host_id(id, name, image)')
       .eq('team_id', params.teamId)
       .eq('host_id', user.id)
       .is('canceled_at', null)
-      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .order(sortCol, { ascending: sortOrder === 'asc' })
       .limit(size + 1);
 
     if (error) return NextResponse.json({ message: error.message }, { status: 500 });
@@ -37,11 +43,14 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
     const nextCursor = hasMore ? String(items[items.length - 1]?.id) : null;
 
     const formatted = items.map((m: any) => ({
-      ...m,
+      id: m.id,
+      name: m.name,
       dateTime: m.date_time,
+      region: m.region,
       participantCount: m.participant_count,
       capacity: m.capacity,
-      role: 'host',
+      isReviewed: false,
+      role: 'host' as const,
     }));
     return NextResponse.json({
       data: formatted,
@@ -71,14 +80,28 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
   if (completed === 'true') query = query.lt('date_time', new Date().toISOString());
   else if (completed === 'false') query = query.gte('date_time', new Date().toISOString());
 
+  const sortCol =
+    sortBy === 'participantCount'
+      ? 'participant_count'
+      : sortBy === 'registrationEnd'
+        ? 'registration_end'
+        : 'date_time';
   const { data: meetings, error } = await query
-    .order(sortBy, { ascending: sortOrder === 'asc' })
+    .order(sortCol, { ascending: sortOrder === 'asc' })
     .limit(size + 1);
 
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
   const hasMore = (meetings?.length || 0) > size;
   const items = hasMore ? meetings!.slice(0, size) : meetings || [];
   const nextCursor = hasMore ? String(items[items.length - 1]?.id) : null;
+
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('meeting_id')
+    .eq('team_id', params.teamId)
+    .eq('user_id', user.id)
+    .in('meeting_id', items.map((m: any) => m.id));
+  const reviewedMeetingIds = new Set((reviews || []).map((r: any) => r.meeting_id));
 
   const formatted = items.map((m: any) => ({
     id: m.id,
@@ -87,6 +110,7 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
     region: m.region,
     participantCount: m.participant_count,
     capacity: m.capacity,
+    isReviewed: reviewedMeetingIds.has(m.id),
     role: m.host_id === user.id ? 'host' : 'participant',
   }));
   return NextResponse.json({ data: formatted, nextCursor, hasMore });

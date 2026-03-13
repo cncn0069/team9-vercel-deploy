@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/jwt';
+import { keysToCamel } from '@/lib/api-utils';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request, props: { params: Promise<{ teamId: string }> }) {
@@ -78,9 +79,11 @@ export async function GET(req: Request, props: { params: Promise<{ teamId: strin
     });
   }
 
-  return NextResponse.json({
-    data: result,
-    nextCursor: null,
-    hasMore: (result?.length ?? 0) >= size,
-  });
+  return NextResponse.json(
+    keysToCamel({
+      data: result,
+      nextCursor: null,
+      hasMore: (result?.length ?? 0) >= size,
+    })
+  );
 }
