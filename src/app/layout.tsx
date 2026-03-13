@@ -23,6 +23,22 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistMono.variable}`}>
       <body className="font-sans antialiased">
+        <nav className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+          <div className="mx-auto flex max-w-3xl items-center gap-6">
+            <a
+              href="/"
+              className="font-medium text-zinc-900 hover:text-zinc-700 dark:text-zinc-100 dark:hover:text-zinc-300"
+            >
+              Home
+            </a>
+            <a
+              href="/api-docs"
+              className="font-medium text-zinc-900 hover:text-zinc-700 dark:text-zinc-100 dark:hover:text-zinc-300"
+            >
+              API 문서 (Swagger)
+            </a>
+          </div>
+        </nav>
         <Providers>{children}</Providers>
       </body>
     </html>

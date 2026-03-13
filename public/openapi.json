@@ -1,0 +1,225 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "같이 달램 API",
+    "version": "1.0.0",
+    "description": "모임 매칭 플랫폼 API\n\n## 인증 방식\n- **JWT Bearer Token**: 로그인 후 발급받은 accessToken을 Authorization 헤더에 포함\n- accessToken 만료: 15분, refreshToken 만료: 7일\n\n## 사용 예시\n```\nAuthorization: Bearer eyJhbGciOiJIUzI1NiIs...\n```"
+  },
+  "servers": [{ "url": "/", "description": "Current origin" }],
+  "security": [{ "Bearer": [] }],
+  "tags": [
+    { "name": "Auth", "description": "회원가입, 로그인, OAuth, 토큰 관리" },
+    { "name": "Users", "description": "유저 정보 조회 및 수정" },
+    { "name": "Meetings", "description": "모임 CRUD, 참여, 참가자" },
+    { "name": "Reviews", "description": "모임 리뷰" },
+    { "name": "Favorites", "description": "모임 찜하기" },
+    { "name": "Posts", "description": "달램 토크 - 게시글 및 댓글" },
+    { "name": "Notifications", "description": "알림" },
+    { "name": "MeetingTypes", "description": "모임 종류" },
+    { "name": "Images", "description": "이미지 업로드" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "로그인 후 발급받은 accessToken"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": { "code": { "type": "string" }, "message": { "type": "string" } },
+        "required": ["code", "message"]
+      }
+    }
+  },
+  "paths": {
+    "/{teamId}/auth/signup": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "회원가입",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string", "example": "dallaem" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" }, "password": { "type": "string" }, "name": { "type": "string" }, "companyName": { "type": "string" } }, "required": ["email", "password", "name"] } } } },
+        "responses": { "201": { "description": "회원가입 성공" }, "409": { "description": "이미 존재하는 이메일" } }
+      }
+    },
+    "/{teamId}/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "로그인",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" }, "password": { "type": "string" } }, "required": ["email", "password"] } } } },
+        "responses": { "200": { "description": "로그인 성공 - user, accessToken, refreshToken 반환" }, "401": { "description": "인증 실패" } }
+      }
+    },
+    "/{teamId}/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "로그아웃",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "refreshToken": { "type": "string" } } } } } },
+        "responses": { "204": { "description": "로그아웃 성공" } }
+      }
+    },
+    "/{teamId}/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "토큰 갱신",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "refreshToken": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "accessToken, refreshToken 반환" } }
+      }
+    },
+    "/{teamId}/users/me": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "내 정보 조회",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "현재 사용자 정보" } }
+      },
+      "patch": {
+        "tags": ["Users"],
+        "summary": "내 정보 수정",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "수정 성공" } }
+      }
+    },
+    "/{teamId}/meetings": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "모임 목록",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "region", "in": "query", "schema": { "type": "string" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": { "200": { "description": "모임 목록 (data, nextCursor, hasMore)" } }
+      },
+      "post": {
+        "tags": ["Meetings"],
+        "summary": "모임 생성",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "201": { "description": "생성 성공" } }
+      }
+    },
+    "/{teamId}/meetings/{meetingId}": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "모임 상세",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "모임 상세" } }
+      },
+      "patch": {
+        "tags": ["Meetings"],
+        "summary": "모임 수정",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "수정 성공" } }
+      },
+      "delete": {
+        "tags": ["Meetings"],
+        "summary": "모임 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/meetings/{meetingId}/join": {
+      "post": {
+        "tags": ["Meetings"],
+        "summary": "모임 참여",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "참여 성공" }, "409": { "description": "이미 참여 중" } }
+      },
+      "delete": {
+        "tags": ["Meetings"],
+        "summary": "참여 취소",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "취소 성공" } }
+      }
+    },
+    "/{teamId}/posts": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "게시글 목록",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "게시글 목록" } }
+      },
+      "post": {
+        "tags": ["Posts"],
+        "summary": "게시글 작성",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "201": { "description": "작성 성공" } }
+      }
+    },
+    "/{teamId}/posts/{postId}": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "게시글 상세",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "게시글 상세" } }
+      }
+    },
+    "/{teamId}/images": {
+      "post": {
+        "tags": ["Images"],
+        "summary": "이미지 업로드 (Presigned URL 발급)",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fileName": { "type": "string" },
+                  "contentType": { "type": "string", "enum": ["image/jpeg", "image/png", "image/webp", "image/gif"] },
+                  "folder": { "type": "string", "enum": ["meetings", "users", "posts"], "default": "meetings" }
+                },
+                "required": ["fileName", "contentType"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "presignedUrl, publicUrl 반환" } }
+      }
+    },
+    "/{teamId}/notifications": {
+      "get": {
+        "tags": ["Notifications"],
+        "summary": "알림 목록",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "알림 목록" } }
+      }
+    }
+  }
+}
