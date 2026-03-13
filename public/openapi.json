@@ -177,17 +177,6 @@
         "responses": { "201": { "description": "작성 성공" } }
       }
     },
-    "/{teamId}/posts/{postId}": {
-      "get": {
-        "tags": ["Posts"],
-        "summary": "게시글 상세",
-        "parameters": [
-          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
-          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "responses": { "200": { "description": "게시글 상세" } }
-      }
-    },
     "/{teamId}/images": {
       "post": {
         "tags": ["Images"],
@@ -219,6 +208,397 @@
         "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { "200": { "description": "알림 목록" } }
+      },
+      "delete": {
+        "tags": ["Notifications"],
+        "summary": "알림 전체 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/auth/google": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Google OAuth 로그인",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "302": { "description": "Google 로그인 페이지로 리다이렉트" } }
+      }
+    },
+    "/{teamId}/auth/kakao": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "카카오 OAuth 로그인",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "302": { "description": "카카오 로그인 페이지로 리다이렉트" } }
+      }
+    },
+    "/{teamId}/users/{userId}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "유저 프로필 조회",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "유저 정보" } }
+      }
+    },
+    "/{teamId}/users/me/meetings": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "내 모임 목록 (호스트+참여)",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "모임 목록" } }
+      }
+    },
+    "/{teamId}/users/me/reviews": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "내 리뷰 목록",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "리뷰 목록" } }
+      }
+    },
+    "/{teamId}/meetings/joined": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "참여한 모임 목록",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "참여 모임 목록" } }
+      }
+    },
+    "/{teamId}/meetings/my": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "내가 만든 모임 목록",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "호스트 모임 목록" } }
+      }
+    },
+    "/{teamId}/meetings/{meetingId}/participants": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "모임 참가자 목록",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "참가자 목록" } }
+      }
+    },
+    "/{teamId}/meetings/{meetingId}/reviews": {
+      "get": {
+        "tags": ["Meetings", "Reviews"],
+        "summary": "모임 리뷰 목록",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "리뷰 목록" } }
+      },
+      "post": {
+        "tags": ["Meetings", "Reviews"],
+        "summary": "모임 리뷰 작성",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "201": { "description": "리뷰 작성 성공" } }
+      }
+    },
+    "/{teamId}/meetings/{meetingId}/status": {
+      "patch": {
+        "tags": ["Meetings"],
+        "summary": "모임 상태 변경",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "상태 변경 성공" } }
+      }
+    },
+    "/{teamId}/meetings/{meetingId}/favorites": {
+      "post": {
+        "tags": ["Meetings", "Favorites"],
+        "summary": "모임 찜하기",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "찜 성공" }, "409": { "description": "이미 찜함" } }
+      },
+      "delete": {
+        "tags": ["Meetings", "Favorites"],
+        "summary": "모임 찜 취소",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "찜 취소 성공" } }
+      }
+    },
+    "/{teamId}/meeting-types": {
+      "get": {
+        "tags": ["MeetingTypes"],
+        "summary": "모임 종류 목록",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "모임 종류 목록" } }
+      },
+      "post": {
+        "tags": ["MeetingTypes"],
+        "summary": "모임 종류 생성",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "201": { "description": "생성 성공" } }
+      }
+    },
+    "/{teamId}/meeting-types/{typeId}": {
+      "get": {
+        "tags": ["MeetingTypes"],
+        "summary": "모임 종류 상세",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "typeId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "모임 종류 정보" } }
+      },
+      "patch": {
+        "tags": ["MeetingTypes"],
+        "summary": "모임 종류 수정",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "typeId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "수정 성공" } }
+      },
+      "delete": {
+        "tags": ["MeetingTypes"],
+        "summary": "모임 종류 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "typeId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/reviews": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "리뷰 목록",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "meetingId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "userId", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "리뷰 목록" } }
+      }
+    },
+    "/{teamId}/reviews/statistics": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "리뷰 통계",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "리뷰 통계" } }
+      }
+    },
+    "/{teamId}/reviews/categories/statistics": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "카테고리별 리뷰 통계",
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "카테고리 통계" } }
+      }
+    },
+    "/{teamId}/reviews/{reviewId}": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "리뷰 상세",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "reviewId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "리뷰 상세" } }
+      },
+      "patch": {
+        "tags": ["Reviews"],
+        "summary": "리뷰 수정",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "reviewId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "수정 성공" } }
+      },
+      "delete": {
+        "tags": ["Reviews"],
+        "summary": "리뷰 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "reviewId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/favorites": {
+      "get": {
+        "tags": ["Favorites"],
+        "summary": "찜한 모임 목록",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "찜 목록" } }
+      }
+    },
+    "/{teamId}/favorites/count": {
+      "get": {
+        "tags": ["Favorites"],
+        "summary": "찜 개수",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "찜 개수" } }
+      }
+    },
+    "/{teamId}/posts/{postId}": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "게시글 상세",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "게시글 상세" } }
+      },
+      "patch": {
+        "tags": ["Posts"],
+        "summary": "게시글 수정",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "수정 성공" } }
+      },
+      "delete": {
+        "tags": ["Posts"],
+        "summary": "게시글 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/posts/{postId}/comments": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "댓글 목록",
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "댓글 목록" } }
+      },
+      "post": {
+        "tags": ["Posts"],
+        "summary": "댓글 작성",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "201": { "description": "작성 성공" } }
+      }
+    },
+    "/{teamId}/posts/{postId}/comments/{commentId}": {
+      "patch": {
+        "tags": ["Posts"],
+        "summary": "댓글 수정",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "commentId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "수정 성공" } }
+      },
+      "delete": {
+        "tags": ["Posts"],
+        "summary": "댓글 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "commentId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/posts/{postId}/like": {
+      "post": {
+        "tags": ["Posts"],
+        "summary": "좋아요",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "좋아요 성공" } }
+      },
+      "delete": {
+        "tags": ["Posts"],
+        "summary": "좋아요 취소",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "postId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "취소 성공" } }
+      }
+    },
+    "/{teamId}/notifications/{notificationId}": {
+      "delete": {
+        "tags": ["Notifications"],
+        "summary": "알림 삭제",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "notificationId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "삭제 성공" } }
+      }
+    },
+    "/{teamId}/notifications/{notificationId}/read": {
+      "put": {
+        "tags": ["Notifications"],
+        "summary": "알림 읽음 처리",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          { "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "notificationId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "읽음 처리 성공" } }
+      }
+    },
+    "/{teamId}/notifications/read-all": {
+      "put": {
+        "tags": ["Notifications"],
+        "summary": "모든 알림 읽음 처리",
+        "security": [{ "Bearer": [] }],
+        "parameters": [{ "name": "teamId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "처리 성공" } }
       }
     }
   }
